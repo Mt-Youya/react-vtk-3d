@@ -1,0 +1,70 @@
+.ui {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 50px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    z-index: 1;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0 10px;
+    background: rgba(0, 0, 0, .1);
+}
+.btn-load-stl,.btn-gen-vtp,.btn-post-proc,.btn-get-info {
+    height: 50px;
+    line-height: 50px;
+    cursor: pointer;
+    padding: 0 10px;
+    color: white;
+    min-width: 120px;
+    text-align: center;
+    border-right: 1px solid #888;
+}
+.btn-load-stl:hover,.btn-gen-vtp:hover,.btn-post-proc:hover,.btn-get-info:hover {
+    background: rgba(0, 0, 0, .2);
+    transition: all linear 150ms;
+}
+.yayan-float-window {
+    position: absolute;
+    background-color: white;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 0 5px rgba(0, 0, 0, .3);
+    border-radius: 3px;
+}
+.yayan-float-window>div .tooth-idx {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    border: 1px solid grey;
+    border-radius: 3px;
+    cursor: pointer;
+    margin-left: 10px;
+    font-size: 10px;
+}
+.yayan-float-window>div .tooth-idx:hover {
+    background: rgba(0, 0, 0, .2);
+    font-weight: bold;
+}
+.yayan-float-window>div .tooth-idx.selected {
+    background: #aaa;
+    color: #333;
+}
+.yayan-float-window>div {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: row;
+}
+.yayan-float-window>div:first-child {
+    margin-top: 0;
+}
+.yayan-float-window>div .tooth-idx:first-child {
+    margin-left: 0;
+}

@@ -1,0 +1,43 @@
+{
+  "name": "oral",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --open --host",
+    "build:dev": "vite build --mode devlopment",
+    "build:qa": "vite build --mode qa",
+    "preview:dev": "pnpm build:dev && vite preview --host --open",
+    "preview:qa": "pnpm build:qa && vite preview --host --open"
+  },
+  "dependencies": {
+    "@gsap/react": "^2.1.1",
+    "@kitware/vtk.js": "^30.5.2",
+    "@radix-ui/react-accordion": "^1.2.0",
+    "@radix-ui/react-icons": "^1.3.0",
+    "@radix-ui/react-progress": "^1.1.0",
+    "ali-oss": "^6.20.0",
+    "axios": "^1.7.2",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
+    "gsap": "^3.12.5",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.25.1",
+    "tailwind-merge": "^2.4.0",
+    "tailwindcss-animate": "^1.0.7",
+    "zustand": "^4.5.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.11",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react-swc": "^3.7.0",
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.39",
+    "tailwindcss": "^3.4.6",
+    "unplugin-auto-import": "^0.18.0",
+    "vite": "^5.3.4",
+    "vite-plugin-inspect": "^0.7.42"
+  }
+}
