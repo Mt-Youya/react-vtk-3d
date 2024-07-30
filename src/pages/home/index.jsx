@@ -1,16 +1,12 @@
 import Header from "@/layout/Header"
 import InfoSide from "@/layout/InfoSide"
-import Card from "@/components/Card"
-import Tips from "@/components/Tips"
-import Tasks from "@/components/Tasks"
-import Loader from "@/components/Loader"
 import init from "@/core"
+import { Card, Loader, Tasks, Tips } from "@/components"
 import { useCoreStore, useModelsInfoStore } from "@/stores"
 import { getAllToothInfo, getDigitalFiles } from "@/apis/common.js"
 import { useLocation } from "react-router-dom"
-import { useEffect } from "react"
 
-export default function Home(){
+export default function Home() {
     const location = useLocation()
     const planId = location.search.split("planId=")[1]
 
@@ -19,7 +15,7 @@ export default function Home(){
     const { coreMethods, setCoreMethods } = useCoreStore()
     const { setModelsInfo } = useModelsInfoStore()
 
-    async function refresh(){
+    async function refresh() {
         const data = await getAllToothInfo(planId).then(({ code, data }) => {
             if (code !== 0) {
                 setLoading(false)
@@ -31,11 +27,10 @@ export default function Home(){
             setLoading(false)
             return null
         })
-        if (!data) return
-        const { segAfter, initial } = data
+        if (!data) return setLoading(false)
+        const { results, initial } = data
         if (initial) {
             await getDigitalFiles(planId).then(async ({ code, data, msg }) => {
-
                 setLoading(false)
                 if (code === 0) {
                     if (!data) return setLoading(false)
@@ -45,16 +40,18 @@ export default function Home(){
                 }
             })
         } else {
-
+            await loadSave(results).catch(err => {
+                console.log(err)
+            })
         }
         setLoading(false)
     }
 
-    function getFileBufferByUrl(url){
-        return fetch(url.split("?")[0]).then(res => res.arrayBuffer()).then(buffer => buffer)
+    function getFileBufferByUrl(url) {
+        return fetch(url.split("?")[0]).then(res => res.arrayBuffer())
     }
 
-    async function loadFile({ digitalMandibleFile, digitalMaxillaFile, lowerfileName, upperfileName }){
+    async function loadFile({ digitalMandibleFile, digitalMaxillaFile, lowerfileName, upperfileName }) {
         setModelsInfo([lowerfileName, upperfileName])
         const files = [digitalMaxillaFile, digitalMandibleFile]
         const modelFileUp = await getFileBufferByUrl(files[0])
@@ -65,15 +62,52 @@ export default function Home(){
         // const Card = this.#getInstance("Card")
         // Card.setModelName([upperfileName, lowerfileName])
         // Card.root.getBoundingClientRect()
-        await coreMethods.triggerInitScene(result)
+        // await coreMethods.triggerInitScene(result)
         const viewUp = coreMethods.getCamera().getViewUp()
         // Card.resetState()
         setLoading(false)
     }
 
+    async function loadSave(data) {
+
+        const {
+            topFileName,
+            downFileName,
+            topResultVtpUrl,
+            downResultVtpUrl,
+            topWidthGps,
+            downWidthGps,
+            topTotalToothWidth,
+            topTotalArchLength,
+            topToothList,
+            downTotalToothWidth,
+            downTotalArchLength,
+            downToothList,
+            teethFgDesc,
+            teethFhDesc,
+            indCoverOverbiteDesc,
+            coverValue,
+        } = data
+
+        const downUrl = await fetch("/api/getVtpFile?url=down").then(res => res.json()).then(({ url }) => url)
+        const topUrl = await fetch("/api/getVtpFile?url=up").then(res => res.json()).then(({ url }) => url)
+        const parser = new DOMParser()
+
+
+        const [down, up] = await Promise.all([getFileBufferByUrl(downUrl), getFileBufferByUrl(topUrl)]).catch(err => {
+            console.log("allErr", err)
+        })
+
+        const { triggerInitScene } = coreMethods
+        triggerInitScene([down, up], "vtp")
+    }
+
     useEffect(() => {
         if (!coreMethods) return
-        // refresh()
+        if (planId) {
+            refresh()
+        }
+        setLoading(false)
     }, [coreMethods])
 
     useEffect(() => {
@@ -82,7 +116,7 @@ export default function Home(){
             const result = init(container)
             setCoreMethods(result)
         }
-    }, [containerRef])
+    }, [])
 
     return (
         <>

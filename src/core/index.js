@@ -28,13 +28,14 @@ import vtkPixelSpaceCallbackMapper from "@kitware/vtk.js/Rendering/Core/PixelSpa
 
 import vtkCircleSource from "@kitware/vtk.js/Filters/Sources/CircleSource"
 import switchFrontViewWorker from "@/services/switchFrontViewWorker.js"
+import { isArrayBuffer } from "@/utils/is"
 
 // import {ScalarMappingTarget} from '@kitware/vtk.core/Common/Core/ScalarsToColors/Constants'
 // import vtkDataArray from '@kitware/vtk.core/Common/Core/DataArray';
 
 // 操作流程：
 // 先加载 STL，编辑之后回传后端返回 VTP，然后加载 VTP
-export default (function (){
+export default (function() {
     const EnumSelectionMode = {
         none: 0,
         rect: 1,
@@ -81,7 +82,7 @@ export default (function (){
     iStyle.addMouseManipulator(boxSelector)
     window.selectorDataSource = new SelectorDataSource()
 
-    return function init(container){
+    return function init(container) {
         const fullScreenRenderer = vtkFullScreenRenderWindow.newInstance({ container })
         const renderer = fullScreenRenderer.getRenderer()
         const renderWindow = fullScreenRenderer.getRenderWindow()
@@ -99,7 +100,7 @@ export default (function (){
 
         initLabelsCanvas()
 
-        function initScene(readerType){
+        function initScene(readerType) {
             destroyScene()
 
             const lModel = new ToothModel(readerType, "l")
@@ -111,7 +112,7 @@ export default (function (){
             initialized = true
         }
 
-        function initModel(idx, readerType){
+        function initModel(idx, readerType) {
             let model = models[idx]
             const name = model.name
             const modelActors = [model.actor, model.actor1, model.actor2]
@@ -124,7 +125,7 @@ export default (function (){
 
         }
 
-        function destroyScene(){
+        function destroyScene() {
             if (!initialized) return
             renderer.removeAllActors()
             models.forEach(model => model.delete())
@@ -134,7 +135,7 @@ export default (function (){
 
         const initCameraInfo = [[0, 0, 0], [0, 1, 0], [0, -1, 0]]
 
-        function render(forceFrontFace = false){
+        function render(forceFrontFace = false) {
             try {
                 let arr = cameraInitInfo || initCameraInfo
                 if (forceFrontFace) {
@@ -151,7 +152,7 @@ export default (function (){
             }
         }
 
-        function handleTurnover(){
+        function handleTurnover() {
             if (models.length === 0) return
             const [lModel, uModel] = models
             uModel.name = "l"
@@ -182,7 +183,7 @@ export default (function (){
 
         const rootContainer = fullScreenRenderer.getRootContainer()
 
-        function handleSelection(){
+        function handleSelection() {
             if (selectionMode !== EnumSelectionMode.none) {
                 handleEscape()
             }
@@ -191,7 +192,7 @@ export default (function (){
             renderWindow.getInteractor().setInteractorStyle(iStyle)
         }
 
-        function handlePolygonSelection(){
+        function handlePolygonSelection() {
             if (selectionMode !== EnumSelectionMode.none) {
                 handleEscape()
             }
@@ -201,7 +202,7 @@ export default (function (){
             oldInteractorStyle.setEnabled(false)
         }
 
-        function handleSpace(){
+        function handleSpace() {
             if (selectionMode === EnumSelectionMode.polygon) {
                 if (boundary.length < 3) {
                     boundary = []
@@ -221,7 +222,7 @@ export default (function (){
             }
         }
 
-        function handleEscape(){
+        function handleEscape() {
             // 按下 Esc 键，退出选区模式
             switch (selectionMode) {
                 case EnumSelectionMode.rect: {
@@ -249,7 +250,7 @@ export default (function (){
             selectionMode = EnumSelectionMode.none
         }
 
-        function handleDelete(isShiftKey){
+        function handleDelete(isShiftKey) {
             if (isShiftKey) {
                 // 强制删除区域内所有点
                 for (const model of models) {
@@ -292,7 +293,7 @@ export default (function (){
             // }
         }
 
-        function getPointerPosition(e, container){
+        function getPointerPosition(e, container) {
             const rect = container.getBoundingClientRect()
             const x = e.clientX - rect.left
             const y = e.clientY - rect.top
@@ -318,7 +319,7 @@ export default (function (){
             }
         })
 
-        function handleRightClick(callData){
+        function handleRightClick(callData) {
             if (renderer !== callData.pokedRenderer) {
                 return
             }
@@ -358,7 +359,7 @@ export default (function (){
             })
         }
 
-        function getScreenMapModelPos(point){
+        function getScreenMapModelPos(point) {
             picker.pick([point.x, point.y, 0.0], renderer)
             if (!picker.getActors().length) {
                 return [0, 0, 0]
@@ -368,14 +369,14 @@ export default (function (){
 
         renderWindow.getInteractor().onRightButtonPress(handleRightClick)
 
-        function drawPolygonSelection(autoClose){
+        function drawPolygonSelection(autoClose) {
             if (!polygonSelection) {
                 polygonSelection = new PolygonSelection(container)
             }
             polygonSelection.update(boundary, autoClose)
         }
 
-        function handleTeethVisible(tooth = "up"){
+        function handleTeethVisible(tooth = "up") {
             const fileIdx = tooth === "up" ? 1 : 0
             const model = models[fileIdx]
             const val = !model.actor.getVisibility()
@@ -386,73 +387,7 @@ export default (function (){
             renderWindow.render()
         }
 
-        // 界面逻辑
-        const btnGenVtp = document.querySelector(".btn-gen-vtp")
-        const btnPostProcess = document.querySelector(".btn-post-proc")
-        const btnGetInfo = document.querySelector(".btn-get-info")
-
-        btnGenVtp?.addEventListener("click", async function (e){
-            const file = STATIC.writeSTL(vertexSculptureFilter.getCachedPolyData(), FormatTypes.ASCII)
-            let vtpFile = ""
-            const ratio = window.prompt("请输入消减因子", ".75")
-            if (!ratio) {
-                return
-            }
-            try {
-                // 上传 STL 文件之后，接口返回一个 vtp 文件链接
-                vtpFile = await ajax.post("/api/stl-to-vtp", {
-                    file, ratio: parseFloat(ratio),
-                })
-            } catch (e) {
-                //
-            }
-
-            if (!vtpFile?.length) {
-                window.alert("处理失败")
-                return
-            }
-
-            const fileContent = await ajax.get(vtpFile)
-            initScene("vtp")
-            loadVtp(fileContent)
-            renderWindow.render()
-        })
-
-        btnPostProcess?.addEventListener("click", async function (){
-            let vtpFile = ""
-            // 上传 VTP 文件到 OSS.core
-
-            await ajax.post("/medical-record/rpc/iocs/segmentation", {
-                planId: 1, vtpUrl: vtpFile, type: 1,
-            })
-
-            window.alert("操作成功，请稍候 2 分钟")
-        })
-
-        btnGetInfo?.addEventListener("click", async function (){
-            let vtpFile = ""
-            try {
-                // 上传 STL 文件之后，接口返回一个 vtp 文件链接
-                const res = await ajax.post("/medical-record/rpc/iocs/getToothWidthInfoById", {
-                    planeId: 1,
-                })
-                vtpFile = res.data?.resultVtpUrl
-            } catch (e) {
-                //
-            }
-
-            if (!vtpFile?.length) {
-                window.alert("文件正在处理中，请稍后重试")
-                return
-            }
-
-            const fileContent = await ajax.get(vtpFile)
-            initScene("vtp")
-            loadVtp(fileContent)
-            renderWindow.render()
-        })
-
-        function loadVtp(index, txt){
+        function loadVtp(index, txt) {
             const textEncoder = new TextEncoder()
             models[index].sourceReader.parseAsArrayBuffer(textEncoder.encode(txt))
             models[index].vertexSculptureFilter.reset()
@@ -460,23 +395,24 @@ export default (function (){
             renderWindow.render()
         }
 
-        function triggerInitScene(buffers, type){
+        function triggerInitScene(buffers, type) {
             return new Promise(resolve => {
                 requestIdleCallback(idle => {
-                    if (idle.timeRemaining()) {
+                    if (idle.timeRemaining() > 0) {
                         resolve(_triggerInitScene(buffers, true, type))
                     }
                 })
             })
         }
 
-        function _triggerInitScene(buffers, forceFrontFace, type = "stl"){
+        function _triggerInitScene(buffers, forceFrontFace, type = "stl") {
             if (!buffers?.length) return false
             initScene(type)
+            const textEncoder = type === "vtp" ? new TextEncoder() : null
             for (let i = 0; i < models.length; i++) {
                 if (type === "vtp") {
-                    const textEncoder = new TextEncoder()
-                    models[i].sourceReader.parseAsArrayBuffer(textEncoder.encode(buffers[i]))
+                    const buffer = isArrayBuffer(buffers[i]) ? buffers[i] : textEncoder?.encode(buffers[i])
+                    models[i].sourceReader.parseAsArrayBuffer(buffer)
                 } else {
                     models[i].sourceReader.parseAsArrayBuffer(buffers[i])
                 }
@@ -491,7 +427,7 @@ export default (function (){
             return render(forceFrontFace)
         }
 
-        function triggerModifyScene(buffers){
+        function triggerModifyScene(buffers) {
             if (!buffers?.length) return false
             initScene("vtp")
             models.forEach((model, index) => {
@@ -501,11 +437,11 @@ export default (function (){
             return render()
         }
 
-        function getCamera(){
+        function getCamera() {
             return renderer.getActiveCamera()
         }
 
-        function setCamera(setInfo){
+        function setCamera(setInfo) {
             const camera = renderer.getActiveCamera()
             camera.setFocalPoint(...setInfo[0])
             camera.setViewUp(...setInfo[1])
@@ -513,13 +449,13 @@ export default (function (){
             renderWindow.render()
         }
 
-        function handleReset(){
+        function handleReset() {
             const buffers = cache.get("buffers")
             return _triggerInitScene(buffers, false)
         }
 
         // 获取删减后的VTP文件
-        function getFileBuffer(){
+        function getFileBuffer() {
             const files = []
             for (const model of models) {
                 const file = STATIC.writeSTL(model.vertexSculptureFilter.getCachedPolyData(), FormatTypes.ASCII)
@@ -528,7 +464,7 @@ export default (function (){
             return files
         }
 
-        function getNowFile(){
+        function getNowFile() {
             const writer = vtkXMLPolyDataWriter.newInstance()
             writer.setFormat(vtkXMLWriter.FormatTypes.ASCII)
             const files = []
@@ -540,19 +476,18 @@ export default (function (){
             return files
         }
 
-        function getSinleNowFile(index){
+        function getSinleNowFile(index) {
             const writer = vtkXMLPolyDataWriter.newInstance()
             writer.setFormat(vtkXMLWriter.FormatTypes.ASCII)
             const model = models[index]
-            const file = writer.write(model.vertexSculptureFilter.getCachedPolyData())
-            return file
+            return writer.write(model.vertexSculptureFilter.getCachedPolyData())
         }
 
-        function getFullscreenRenderer(){
+        function getFullscreenRenderer() {
             return fullScreenRenderer
         }
 
-        function triggerFinalFile(buffers){
+        function triggerFinalFile(buffers) {
             if (!buffers?.length) return false
             initScene("vtp")
             // let index = 0;
@@ -565,7 +500,7 @@ export default (function (){
             return renderWindow.render()
         }
 
-        function triggerFile(buffer, idx){
+        function triggerFile(buffer, idx) {
             const textEncoder = new TextEncoder()
             models[idx].sourceReader.parseAsArrayBuffer(textEncoder.encode(buffer))
             models[idx].vertexSculptureFilter.reset()
@@ -573,7 +508,7 @@ export default (function (){
             return renderWindow.render()
         }
 
-        function getToothMarkedPointIds(idx){
+        function getToothMarkedPointIds(idx) {
             if (!models[idx]) return []
             const { vertexSculptureFilter } = models[idx]
             const cachedPolyData = vertexSculptureFilter.getCachedPolyData()
@@ -592,7 +527,7 @@ export default (function (){
             }
         }
 
-        function setGingivaModel(idx){
+        function setGingivaModel(idx) {
             if (gingivaModels[idx]) {
                 const gModel = gingivaModels[idx]
                 const modelActors = [gModel.actor, gModel.actor1, gModel.actor2]
@@ -614,7 +549,7 @@ export default (function (){
             renderWindow.render()
         }
 
-        function initLabelsCanvas(){
+        function initLabelsCanvas() {
             const textCanvas = document.createElement("canvas")
             textCanvas.setAttribute("width", container.clientWidth)
             textCanvas.setAttribute("height", container.clientHeight)
@@ -623,7 +558,7 @@ export default (function (){
             textCtx = textCanvas.getContext("2d")
         }
 
-        function renderToothOrder(points, viewUp, modelIdx){
+        function renderToothOrder(points, viewUp, modelIdx) {
             const key = modelIdx === 0 ? "up" : "down"
             if (JSON.stringify(toothOrders[key]) === "{}") {
                 points.forEach(item => {
@@ -658,7 +593,7 @@ export default (function (){
             renderWindow.render()
         }
 
-        function addToothOrder(center, viewUp, name, key, isRefresh){
+        function addToothOrder(center, viewUp, name, key, isRefresh) {
             if (toothOrders[key][name]) {
                 const { actor, textActor } = toothOrders[key][name]
                 renderer.removeActor(actor)
@@ -701,7 +636,7 @@ export default (function (){
             }
         }
 
-        function handleGingivaAbout(idx){
+        function handleGingivaAbout(idx) {
             if (!gingivaModels[idx]) return false
             const gModel = gingivaModels[idx]
             const gVal = !gModel.actor.getVisibility()
@@ -719,7 +654,7 @@ export default (function (){
             return true
         }
 
-        function addToothWidthLabels(type, key, name, P1, P2){
+        function addToothWidthLabels(type, key, name, P1, P2) {
             for (let k in toothWidths[type][key]) {
                 renderer.removeActor(toothWidths[type][key][k])
             }
@@ -744,7 +679,7 @@ export default (function (){
             renderWindow.render()
         }
 
-        function addTextTag(center, name){
+        function addTextTag(center, name) {
             const planeSource = vtkPlaneSource.newInstance()
             const actor = vtkActor.newInstance()
             const mapper = vtkMapper.newInstance()
@@ -756,9 +691,10 @@ export default (function (){
             psMapper.setInputConnection(planeSource.getOutputPort())
             psMapper.setCallback((coordsList) => {
                 if (textCtx && container) {
+                    const dpr = window.devicePixelRatio || 1
                     const [x1, y1] = coordsList[0],
                         [x2, y2] = coordsList[Math.floor(coordsList.length / 2)],
-                        x = (x1 + x2) / 2, y = container.clientHeight - (y1 + y2) / 2
+                        x = (x1 + x2) / dpr / 2, y = container.clientHeight - (y1 + y2) / dpr / 2
                     addTextBg(textCtx, x, y + 20)
                     textCtx.font = "12px serif"
                     textCtx.textAlign = "center"
@@ -770,7 +706,7 @@ export default (function (){
             return textActor
         }
 
-        function addTextBg(ctx, top, left){
+        function addTextBg(ctx, top, left) {
             const radius = 10
             const width = 84,
                 height = 20,
@@ -788,7 +724,7 @@ export default (function (){
             ctx.fillStyle = "#000"
         }
 
-        function handleArchWidthVisible(type, visible){
+        function handleArchWidthVisible(type, visible) {
             const tw_actors = toothWidths[type]
             for (const k in tw_actors) {
                 for (const j in tw_actors[k]) {
@@ -800,7 +736,7 @@ export default (function (){
             if (container && textCtx) textCtx.clearRect(0, 0, container.clientWidth, container.clientHeight)
         }
 
-        function addLine(point1, point2){
+        function addLine(point1, point2) {
             const lineSource = vtkLineSource.newInstance({
                 point1,
                 point2,
@@ -814,7 +750,7 @@ export default (function (){
             return actor
         }
 
-        function initSpline(index){
+        function initSpline(index) {
             const widgetManager = vtkWidgetManager.newInstance()
             widgetManager.setRenderer(renderer)
             const spline = vtkSplineWidget.newInstance()
@@ -833,7 +769,7 @@ export default (function (){
             widgetManager.releaseFocus()
         }
 
-        function addSpline(points, index, normal){
+        function addSpline(points, index, normal) {
             if (!splineWidgets[index]) {
                 initSpline(index)
             }
@@ -858,14 +794,14 @@ export default (function (){
             renderWindow.render()
         }
 
-        function setSplineWidgetVisible(value, index){
+        function setSplineWidgetVisible(value, index) {
             if (!splineWidgets[index]) return
             const { spline } = splineWidgets[index]
             spline.setVisibility(value)
             renderWindow.render()
         }
 
-        function addPlanSource(normal, center, index){
+        function addPlanSource(normal, center, index) {
             const planeSource = vtkPlaneSource.newInstance()
             const mapper = vtkMapper.newInstance()
             const actor = vtkActor.newInstance()
@@ -883,7 +819,7 @@ export default (function (){
             splineWidgets[index].plane = { planeSource, mapper, actor }
         }
 
-        function addSphere(pos){
+        function addSphere(pos) {
             const [x, y, z] = pos
             const sphereSource = vtkSphereSource.newInstance()
             sphereSource.setCenter(pos)
@@ -897,7 +833,7 @@ export default (function (){
             return actor
         }
 
-        function toggleLight(){
+        function toggleLight() {
             models.forEach(model => {
                 const v = !model.actor.getProperty().getLighting()
                 model.actor.getProperty().setLighting(v)
@@ -906,14 +842,14 @@ export default (function (){
             renderWindow.render()
         }
 
-        function getFrontViewCameraInfo(){
+        function getFrontViewCameraInfo() {
             return cameraInitInfo || [[0, 0, 0], // focal_point
                 [0, 1, 0], // up
                 [0, -1, 0], // position
             ]
         }
 
-        function resetCamera(){
+        function resetCamera() {
             const camera = renderer.getActiveCamera()
             const arr = getFrontViewCameraInfo()
             camera.setViewUp(arr[1])
@@ -921,7 +857,7 @@ export default (function (){
             camera.setFocalPoint(...arr[0])
         }
 
-        function switchView(type, selectedIdx = null){
+        function switchView(type, selectedIdx = null) {
             switch (type) {
                 case 0: // 正面视图
                 {
@@ -951,10 +887,9 @@ export default (function (){
             }
         }
 
-        function getFirstVisibleToothModel(){
-            // const idx = NewInstance.getInstance("Card").getFirstVisibleTeethIdx()
-            // return idx != -1 ? models[idx] : null
+        function getFirstVisibleToothModel() {
             return null
+            // return idx != -1 ? models[idx] : null
         }
 
         return {

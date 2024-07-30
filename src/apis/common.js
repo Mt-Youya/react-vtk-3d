@@ -58,15 +58,6 @@ export function getOssVtp(data) {
     })
 }
 
-
-export function getCoverDegreeByModel(data) {
-    return request({
-        url: import.meta.env.VITE_STL_API_URL + "/api/cover-degree-v2",
-        method: METHOD.POST,
-        data,
-    })
-}
-
 export function saveInfo(data) {
     return request({
         url: import.meta.env.VITE_OSS_URL + "/medical-record/rpc/iocs/save3DMeasureInfo",
@@ -77,7 +68,8 @@ export function saveInfo(data) {
 
 export function getDigitalFiles(planId) {
     return request({
-        url: `medical-record/rpc/iocs/plan/getDigital?planId=${planId}`,
+        url: `http://localhost:9009/api/getDigital`,
+        params: { id: planId },
         method: METHOD.GET,
     })
 }
@@ -92,7 +84,7 @@ export function measureModel(data) {
 
 export function getAllToothInfo(planId) {
     return request({
-        url: "/medical-record/rpc/iocs/getAllToothInfo",
+        url: "http://localhost:9009/api/getAllToothInfo",
         method: METHOD.GET,
         params: { planId },
     })

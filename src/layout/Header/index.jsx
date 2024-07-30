@@ -14,7 +14,7 @@ function Header(){
 
     const { handleSelection, handlePolygonSelection, handleEscape, handleReset, handleDelete, handleSpace } = coreMethods ?? {}
 
-    const [loading, setLoading] = useState(true)
+    const [loading, setLoading] = useState(false)
     const [decrease, setDecrease] = useState(false)
 
     const [tools, setTools] = useState([
@@ -122,6 +122,7 @@ function Header(){
         if (!coreMethods) {
             return
         }
+        setLoading(false)
         // headerRef.current.addEventListener("keyup", handleKeyUp)
         document.body.addEventListener("keyup", handleKeyUp)
     }, [coreMethods])

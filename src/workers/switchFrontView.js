@@ -208,7 +208,7 @@ function findPointAtFrontFace(data, planeDef, centerLine) {
         }
     }
     if (arr.length < 3) {
-        return arr[0]
+        return points[0].map(n => -n)
     } else {
         const arr1 = [
             [0, 1, getDistance(arr[0], arr[1])],

@@ -24,6 +24,12 @@ export default defineConfig({
     server: {
         open: true,
         port: 8080,
+        proxy: {
+            "/api": {
+                target: "http://localhost:9009",
+                changeOrigin: true,
+            },
+        },
     },
     build: {
         outDir: "dist",
@@ -36,6 +42,10 @@ export default defineConfig({
                 compact: true,
                 manualChunks: {
                     react: ["react", "react-dom", "react-router-dom"],
+                    "@radix-ui": ["@radix-ui/react-accordion", "@radix-ui/react-icons", "@radix-ui/react-progress"],
+                    tailwindcss: ["tailwindcss-animate", "tailwind-merge", "clsx", "class-variance-authority"],
+                    gsap: ["gsap", "@gsap/react"],
+                    vtk: ["@kitware/vtk.js"],
                 },
                 assetFileNames: chunkInfo => {
                     const ext = extname(chunkInfo.name)

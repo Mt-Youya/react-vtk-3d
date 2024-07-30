@@ -21,12 +21,12 @@ service.interceptors.request.use(
     },
     (error) => {
         return Promise.reject(error)
-    }
+    },
 )
 
 service.interceptors.response.use((response) => {
         const res = response.data
-        if (res.code || res.code !== 0) {
+        if (res.code && res.code !== 0) {
             return Promise.reject(res.message || "Error")
         } else {
             return res
