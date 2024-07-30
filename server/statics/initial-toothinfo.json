@@ -1,0 +1,9 @@
+{
+    "results": null,
+    "initial": {
+        "maxillaFile": "/assets/models/top.stl",
+        "topFilename": "top.stl",
+        "mandibleFile": "/assets/models/down.stl",
+        "downFilename": "down.stl"
+    }
+}

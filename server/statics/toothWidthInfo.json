@@ -1,0 +1,213 @@
+{
+    "resultVtpUrl": "http://yayan-dev.oss-cn-shanghai.aliyuncs.com/225900bc7f0b445291d63dcf223b3a5f.vtp",
+    "toothList": [
+        {
+            "name": 1,
+            "value": 5.44,
+            "coordinate": [
+                {
+                    "x": -5.32,
+                    "y": -22.14
+                },
+                {
+                    "x": -0.4,
+                    "y": -19.81
+                }
+            ]
+        },
+        {
+            "name": 2,
+            "value": 6.17,
+            "coordinate": [
+                {
+                    "x": -10.85,
+                    "y": -18.99
+                },
+                {
+                    "x": -4.76,
+                    "y": -19.95
+                }
+            ]
+        },
+        {
+            "name": 3,
+            "value": 6.51,
+            "coordinate": [
+                {
+                    "x": -10.71,
+                    "y": -19.09
+                },
+                {
+                    "x": -15.83,
+                    "y": -15.07
+                }
+            ]
+        },
+        {
+            "name": 4,
+            "value": 6.69,
+            "coordinate": [
+                {
+                    "x": -15.3,
+                    "y": -13.65
+                },
+                {
+                    "x": -17.49,
+                    "y": -7.33
+                }
+            ]
+        },
+        {
+            "name": 5,
+            "value": 7.06,
+            "coordinate": [
+                {
+                    "x": -19.83,
+                    "y": -0.41
+                },
+                {
+                    "x": -17.61,
+                    "y": -7.11
+                }
+            ]
+        },
+        {
+            "name": 6,
+            "value": 6.92,
+            "coordinate": [
+                {
+                    "x": -22.15,
+                    "y": 6.68
+                },
+                {
+                    "x": -20.05,
+                    "y": 0.09
+                }
+            ]
+        },
+        {
+            "name": 7,
+            "value": 9.85,
+            "coordinate": [
+                {
+                    "x": -23.21,
+                    "y": 9.99
+                },
+                {
+                    "x": -26.21,
+                    "y": 19.37
+                }
+            ]
+        },
+        {
+            "name": 9,
+            "value": 5.43,
+            "coordinate": [
+                {
+                    "x": 4.73,
+                    "y": -22.06
+                },
+                {
+                    "x": -0.03,
+                    "y": -19.44
+                }
+            ]
+        },
+        {
+            "name": 10,
+            "value": 6.06,
+            "coordinate": [
+                {
+                    "x": 4.14,
+                    "y": -18.55
+                },
+                {
+                    "x": 10.17,
+                    "y": -19.2
+                }
+            ]
+        },
+        {
+            "name": 11,
+            "value": 6.51,
+            "coordinate": [
+                {
+                    "x": 14.93,
+                    "y": -14.24
+                },
+                {
+                    "x": 9.03,
+                    "y": -16.98
+                }
+            ]
+        },
+        {
+            "name": 12,
+            "value": 6.97,
+            "coordinate": [
+                {
+                    "x": 17.53,
+                    "y": -7.65
+                },
+                {
+                    "x": 15.33,
+                    "y": -14.26
+                }
+            ]
+        },
+        {
+            "name": 13,
+            "value": 7.12,
+            "coordinate": [
+                {
+                    "x": 20.01,
+                    "y": -0.89
+                },
+                {
+                    "x": 17.35,
+                    "y": -7.49
+                }
+            ]
+        },
+        {
+            "name": 14,
+            "value": 7.74,
+            "coordinate": [
+                {
+                    "x": 22.83,
+                    "y": 6.75
+                },
+                {
+                    "x": 20.48,
+                    "y": -0.62
+                }
+            ]
+        },
+        {
+            "name": 15,
+            "value": 10.48,
+            "coordinate": [
+                {
+                    "x": 23.66,
+                    "y": 9.37
+                },
+                {
+                    "x": 26.84,
+                    "y": 19.36
+                }
+            ]
+        }
+    ],
+    "totalToothWidth": 98.95,
+    "errorMessage": null,
+    "totalArchLength": 103.37,
+    "spaceList": null,
+    "teethFhDesc": "反覆合II° -43%",
+    "teethFgDesc": "反覆盖II° -4.14mm",
+    "coverValue": -4.14,
+    "dentitionTeethFh": 6,
+    "dentitionTeethFg": 8,
+    "indCoverOverbiteDesc": "",
+    "segStatus": 1,
+    "measureStatus": 1
+}
