@@ -43,6 +43,12 @@ app.add_middleware(
     allow_headers=['*'],
 )
 
+response = {
+    "code":0,
+    "data":None,
+    "msg":"success"
+}
+
 @app.post('/api/stl-to-vtp')
 def stl_to_vtp(input: StlInput):
     milli = round(time.time() * 1000)
@@ -120,51 +126,45 @@ def get_all_tooth_info(planId):
     if planId == '1098':
         f = open("./statics/initial-toothinfo.json","r")
         text = f.read()
-        return {
-            "code": 0,
-            "data": json.loads(text)
-        }
+        response['data'] = json.loads(text)
+        return response
     elif planId == '1088':
         f = open("./statics/save-toothinfo.json","r")
         text = f.read()
-        return {
-            "code": 0,
-            "data": json.loads(text)
-        }
-
-    
-
-
+        response['data'] = json.loads(text)
+        return response
+ 
 @app.get("/api/getVtpFile")
-def get_vtp_file(url):
+def get_vtp_file(url): 
     if url == "down":
-        return {
-            'url': "/assets/models/down.vtp"
-        }
+        response['data'] = { 'url': "/assets/models/down.vtp" }
+        return response
     elif url == "up":
-        return {
-            'url': "/assets/models/up.vtp"
-        }
+        response['data'] = { 'url': "/assets/models/up.vtp" }
+        return response
     else:
         return None
 
 @app.get('/api/getToothWidthInfoById')
 def get_tooth_width_info_by_id(id):
-    return
+    f = open("./statics/toothWidthInfo.json","r")
+    text = f.read()
+    response['data'] = json.loads(text)
+    return response
 
 
 @app.get("/api/getDigital")
 def get_digital(id): 
-    return {
+    response['data'] = {
         "maxillaFile":  "/assets/models/up.stl",
         "upFilename": "up.stl",
-        "digitalMandibleFile":  "/assets/models/down.stl",
+        "mandibleFile":  "/assets/models/down.stl",
         "downFilename": "down.stl"
     }
+    return response
 
 server_port = 9009
 
 import uvicorn
 if __name__ == "__main__":
-    #			 mian 是文件名 app 是服务名
     uvicorn.run("main:app", host="0.0.0.0", port=server_port, reload=True)

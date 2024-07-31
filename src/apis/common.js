@@ -28,11 +28,11 @@ export function screenshot(data) {
     })
 }
 
-export function getInfo(params) {
+export function getInfo(id) {
     return request({
-        url: "/medical-record/rpc/iocs/getToothWidthInfoById",
+        url: "/api/getToothWidthInfoById",
         method: METHOD.GET,
-        params,
+        params: { id },
     })
 }
 
@@ -68,7 +68,7 @@ export function saveInfo(data) {
 
 export function getDigitalFiles(planId) {
     return request({
-        url: `http://localhost:9009/api/getDigital`,
+        url: `/api/getDigital`,
         params: { id: planId },
         method: METHOD.GET,
     })
@@ -84,7 +84,7 @@ export function measureModel(data) {
 
 export function getAllToothInfo(planId) {
     return request({
-        url: "http://localhost:9009/api/getAllToothInfo",
+        url: "/api/getAllToothInfo",
         method: METHOD.GET,
         params: { planId },
     })

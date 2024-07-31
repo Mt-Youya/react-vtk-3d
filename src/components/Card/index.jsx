@@ -1,7 +1,7 @@
 import { Eye, EyeClose } from "/public/assets/icons"
 import { useCoreStore, useModelsInfoStore } from "@/stores"
 
-export default function Card(){
+export default function Card() {
     const { coreMethods } = useCoreStore() ?? {}
     const { modelsInfo } = useModelsInfoStore()
     const [views, setViews] = useState([
@@ -11,18 +11,12 @@ export default function Card(){
     ])
 
     const [models, setModels] = useState([
-        { text: modelsInfo[0], visible: true, deleted: false, selected: true },
-        { text: modelsInfo[1], visible: true, deleted: false, selected: false },
+        { visible: true, selected: true },
+        { visible: true, selected: false },
     ])
 
-    useEffect(() => {
-        const modelList = [...models]
-        modelList[0].text = modelsInfo[0]
-        modelList[1].text = modelsInfo[1]
-        setModels(modelList)
-    }, [modelsInfo])
 
-    function handleEyeClick(event, idx){
+    function handleEyeClick(event, idx) {
         event.stopPropagation()
         coreMethods.handleTeethVisible(["up", "down"][idx])
         const target = [...models]
@@ -30,7 +24,7 @@ export default function Card(){
         setModels(target)
     }
 
-    function handleViewerTabsClick(index){
+    function handleViewerTabsClick(index) {
         setViews(prevState => {
             const list = prevState.map(prev => ({ ...prev, selected: false }))
             list[index].selected = true
@@ -47,7 +41,7 @@ export default function Card(){
         }
     }
 
-    function handleModelTab(index){
+    function handleModelTab(index) {
         setModels(prevState => {
             if (prevState[index].selected) return prevState
             prevState[index ^ 1].selected = prevState[index].selected
@@ -78,17 +72,17 @@ export default function Card(){
                 <h2 className="text-left p-4 text-lg font-bold text-[#6C6C6C]"> 牙列 </h2>
                 <ul id="modelInfo-wrapper"
                     className="*:relative *:w-full *:py-2.5 *:p-5 *:pr-6 *:flex *:items-center *:border-l-4 *:border-transparent *:border-solid *:cursor-pointer *:overflow-hidden *:transition-colors *:duration-500">
-                    {models.map(({ text, visible, deleted, selected }, index) => (
+                    {models.map(({ visible, selected }, index) => (
                         <li className="aria-selected:bg-[#E5F4FF] aria-selected:border-[#2381FE]" role="listitem"
                             key={index} aria-selected={selected} onClick={() => handleModelTab(index)}
                         >
                             <img src={visible ? Eye : EyeClose} className="w-5 h-5 text-[#909090]" role="img" alt="eye"
                                  onClick={e => handleEyeClick(e, index)} />
-                            &emsp;{text}
+                            &emsp;{modelsInfo[index].filename}
                             <span
-                                className={`absolute -right-10 top-1 py-1 w-28 scale-75 rotate-45 ${!!deleted ? "bg-[#2381FE]" : "bg-[#646466]"} origin-center text-white text-xs transition-colors duration-300 ease-in-out`}
+                                className={`absolute -right-10 top-1 py-1 w-28 scale-75 rotate-45 ${!!modelsInfo[index].deleted ? "bg-[#2381FE]" : "bg-[#646466]"} origin-center text-white text-xs transition-colors duration-300 ease-in-out`}
                             >
-                                {deleted ? "已" : "未"}删减
+                                {modelsInfo[index].deleted ? "已" : "未"}删减
                             </span>
                         </li>
                     ))}

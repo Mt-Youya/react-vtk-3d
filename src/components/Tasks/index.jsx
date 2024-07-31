@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { ArrowRight } from "/public/assets/icons"
+import { useTaskStatusStore } from "@/stores"
 
 export default function Tasks() {
 
@@ -23,22 +24,24 @@ export default function Tasks() {
             progress: 80,
         },
     ]
+    const { status } = useTaskStatusStore()
+    const statusMap = [void 0, "( 进行中 )", "( 已完成 )"]
 
     return (
         <div id="tasks" className="absolute right-0 bottom-0 z-10">
             <div className="rounded-md w-64 bg-[#8F8F8F] py-2.5 px-4 overflow-hidden">
-                <h2 id="task-title" aria-expanded={expanded}
+                <h2 id="task-title"
                     className="cursor-pointer text-white text-left flex justify-between items-center hover:text-gray-800"
                     onClick={() => setExpanded(prevState => !prevState)}
                 >
-                    <p><span>任务列表</span> <span className="text-xs"> ( 进行中 ) </span></p>
-                    <img src={ArrowRight} alt="arrow" className={`w-4 h-4 transition-all duration-150 ${expanded ? "rotate-90" : ""}`} />
+                    <p><span>任务列表</span> <span className="text-xs"> {statusMap[status]}  </span></p>
+                    <img src={ArrowRight} alt="arrow"
+                         className={`w-4 h-4 transition-all duration-150${expanded ? " rotate-90" : ""}`} />
                 </h2>
 
                 <ul className="aria-expanded:max-h-0 max-h-20 w-full text-[#C1C1C1] text-xs text-left transition-max-height duration-500"
                     aria-expanded={expanded}
                 >
-
                     {taskList.map(task => (
                         <li className="flex justify-between items-center pt-2" key={task.title}>
                             <p> {task.title} </p>
