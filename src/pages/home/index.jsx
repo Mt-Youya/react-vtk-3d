@@ -70,7 +70,6 @@ export default function Home() {
                 addToothWidthLabels(type, k, name, p1, p2)
             }
         }
-
     }
 
     useEffect(() => {

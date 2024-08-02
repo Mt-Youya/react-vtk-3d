@@ -9,20 +9,24 @@ import math
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
 import util
-from oss_client import OssClient
+# from oss_client import OssClient
+
 
 class StlInput(BaseModel):
     file: str
     faces: int
 
+
 class VtpInput(BaseModel):
     file: str
-    
+
+
 class CoverDegreeInput(BaseModel):
     uModel: str
     lModel: str
     debug: Optional[bool] = Field(False)
-    
+
+
 class ScreenShotInput(BaseModel):
     uModel: str
     lModel: str
@@ -30,6 +34,7 @@ class ScreenShotInput(BaseModel):
     up: list[float]
     position: list[float]
     debug: Optional[bool] = Field(False)
+
 
 app = FastAPI()
 
@@ -44,17 +49,18 @@ app.add_middleware(
 )
 
 response = {
-    "code":0,
-    "data":None,
-    "msg":"success"
+    "code": 0,
+    "data": None,
+    "msg": "success"
 }
+
 
 @app.post('/api/stl-to-vtp')
 def stl_to_vtp(input: StlInput):
     milli = round(time.time() * 1000)
     random.seed(milli)
-    fno = str(milli) + str(round(sys.maxsize * random.random())) # 当前时间 + 随机数
-    
+    fno = str(milli) + str(round(sys.maxsize * random.random()))  # 当前时间 + 随机数
+
     # 生成 vtp 文件内容并保存到本地
     stl_file = fno + '.stl'
     if not os.path.exists('files/'):
@@ -67,9 +73,10 @@ def stl_to_vtp(input: StlInput):
     target_reduction = 1 - (input.faces / mesh.n_faces)
     pro_decimated = mesh.decimate(target_reduction, volume_preservation=True)
     pro_decimated.save('files/' + fno + '.vtp')
-    vtp_file =  open('files/' + fno + '.vtp', 'r') 
+    vtp_file = open('files/' + fno + '.vtp', 'r')
     return vtp_file.read()
- 
+
+
 @app.post('/api/vtp-set-scalars-label')
 def vtp_set_scalars_label(input: VtpInput):
     vtp_file = 'temp.vtp'
@@ -95,76 +102,84 @@ def vtp_set_scalars_label(input: VtpInput):
     return {'data': res}
 
 
-@app.post('/api/screen-shot')
-def screen_shot(input: ScreenShotInput):
-    (slice_imgs, l_vtp, u_vtp) = util.screenShot(input.lModel, input.uModel, [input.focalPoint, input.up, input.position])
-    for item in slice_imgs:
-        if len(item) > 0 and os.path.exists(item):
-            shutil.move(item, f'./files/{item}')
-    if not input.debug:
-        for fn in [l_vtp, u_vtp]:
-            os.remove(fn)
-    old_slice_imgs = [f'./files/{item}' for item in slice_imgs]
-    oss_client = OssClient()
-    slice_imgs = [oss_client.upload_file(f'./files/{item}') for item in slice_imgs]
-    for i in range(0, len(old_slice_imgs)):
-        if slice_imgs[i] != old_slice_imgs:
-            os.remove(old_slice_imgs[i])
-    return {
-        'screenshots': {
-            'left': slice_imgs[0],
-            'right': slice_imgs[1],
-            'center': slice_imgs[2],
-            'upper': slice_imgs[3],
-            'lower': slice_imgs[4],
-        }
-    }
+# @app.post('/api/screen-shot')
+# def screen_shot(input: ScreenShotInput):
+#     (slice_imgs, l_vtp, u_vtp) = util.screenShot(input.lModel, input.uModel,
+#                                                  [input.focalPoint, input.up, input.position])
+#     for item in slice_imgs:
+#         if len(item) > 0 and os.path.exists(item):
+#             shutil.move(item, f'./files/{item}')
+#     if not input.debug:
+#         for fn in [l_vtp, u_vtp]:
+#             os.remove(fn)
+#     old_slice_imgs = [f'./files/{item}' for item in slice_imgs]
+#     # oss_client = OssClient()
+#     # slice_imgs = [oss_client.upload_file(f'./files/{item}') for item in slice_imgs]
+#     for i in range(0, len(old_slice_imgs)):
+#         if slice_imgs[i] != old_slice_imgs:
+#             os.remove(old_slice_imgs[i])
+#     return {
+#         'screenshots': {
+#             'left': slice_imgs[0],
+#             'right': slice_imgs[1],
+#             'center': slice_imgs[2],
+#             'upper': slice_imgs[3],
+#             'lower': slice_imgs[4],
+#         }
+#     }
+
 
 import json
+
+
 @app.get("/api/getAllToothInfo")
-def get_all_tooth_info(planId): 
+def get_all_tooth_info(planId):
     if planId == '1098':
-        f = open("./statics/initial-toothinfo.json","r")
+        f = open("./statics/initial-toothinfo.json", "r")
         text = f.read()
         response['data'] = json.loads(text)
         return response
     elif planId == '1088':
-        f = open("./statics/save-toothinfo.json","r")
+        f = open("./statics/save-toothinfo.json", "r")
         text = f.read()
         response['data'] = json.loads(text)
         return response
- 
+
+
 @app.get("/api/getVtpFile")
-def get_vtp_file(url): 
+def get_vtp_file(url):
     if url == "down":
-        response['data'] = { 'url': "/assets/models/down.vtp" }
+        response['data'] = {'url': "/assets/models/down.vtp"}
         return response
     elif url == "up":
-        response['data'] = { 'url': "/assets/models/up.vtp" }
+        response['data'] = {'url': "/assets/models/up.vtp"}
         return response
     else:
         return None
 
+
 @app.get('/api/getToothWidthInfoById')
 def get_tooth_width_info_by_id(id):
-    f = open("./statics/toothWidthInfo.json","r")
+    f = open("./statics/toothWidthInfo.json", "r")
     text = f.read()
     response['data'] = json.loads(text)
     return response
 
 
 @app.get("/api/getDigital")
-def get_digital(id): 
+def get_digital(id):
     response['data'] = {
-        "maxillaFile":  "/assets/models/up.stl",
+        "maxillaFile": "/assets/models/up.stl",
         "upFilename": "up.stl",
-        "mandibleFile":  "/assets/models/down.stl",
+        "mandibleFile": "/assets/models/down.stl",
         "downFilename": "down.stl"
     }
     return response
 
+
 server_port = 9009
 
 import uvicorn
+
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=server_port, reload=True)
