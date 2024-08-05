@@ -146,18 +146,6 @@ def get_all_tooth_info(planId):
         return response
 
 
-@app.get("/api/getVtpFile")
-def get_vtp_file(url):
-    if url == "down":
-        response['data'] = {'url': "/assets/models/down.vtp"}
-        return response
-    elif url == "up":
-        response['data'] = {'url': "/assets/models/up.vtp"}
-        return response
-    else:
-        return None
-
-
 @app.get('/api/getToothWidthInfoById')
 def get_tooth_width_info_by_id(id):
     f = open("./statics/toothWidthInfo.json", "r")
