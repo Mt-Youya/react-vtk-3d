@@ -1,0 +1,39 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm outdated *)",
+      "Bash(pnpm install *)",
+      "Bash(cat src/stores/*.js)",
+      "Bash(cat src/stores/*.jsx)",
+      "Bash(npx @tailwindcss/upgrade@latest --help)",
+      "Bash(pnpm --version)",
+      "Bash(nvm list *)",
+      "Bash(brew list *)",
+      "Read(//usr/local/bin/**)",
+      "Read(//Users/yonjay/.nvm/versions/**)",
+      "Bash(ls /Users/yonjay/codes/hubs/react-vtk-3d/node_modules/.pnpm/@kitware+vtk.js@*/node_modules/@kitware/vtk.js/Rendering/Misc/)",
+      "Bash(echo \"test\")",
+      "Read(//tmp/**)",
+      "Bash(fnm use *)",
+      "Bash(pnpm build:dev)",
+      "Bash(npx tsc *)",
+      "Bash(pnpm exec *)",
+      "Bash(pnpm add *)",
+      "Bash(ls src/*.ts src/*.tsx)",
+      "Bash(ls vite.config*)",
+      "WebFetch(domain:ui.shadcn.com)",
+      "WebFetch(domain:base-ui.com)",
+      "WebFetch(domain:www.npmjs.com)",
+      "WebSearch",
+      "Bash(npm view *)",
+      "WebFetch(domain:github.com)",
+      "Bash(pnpm remove *)",
+      "Bash(pnpm dlx *)",
+      "Read(//Users/yonjay/**)",
+      "Bash(pnpm config *)",
+      "Bash(PNPM_CONFIG_REGISTRY=https://registry.npmjs.org pnpm dlx *)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('name:', d.get\\('name'\\)\\); print\\('version:', d.get\\('version'\\)\\); print\\('scripts:', json.dumps\\(d.get\\('scripts'\\), indent=2\\)\\)\")",
+      "Bash(ls *)"
+    ]
+  }
+}
