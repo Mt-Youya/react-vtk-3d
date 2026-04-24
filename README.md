@@ -1,201 +1,179 @@
-# react-vtk-3d
+# oral — 牙科 3D 可视化平台
 
-基于 React 19 + VTK.js 的牙科 3D 模型交互式编辑与分析系统。支持上下颌模型实时可视化、顶点编辑删减、牙弓宽度测量、Bolton 指数分析等功能。
+基于 **React + Three.js（R3F）** 的牙科 3D 模型可视化与分析工具，配套 **FastAPI + MeshSegNet** 后端服务，支持 STL 牙齿网格的 AI 自动分割与彩色渲染。
+
+> **当前分支：`feat/three-js-refactor`**
+> 将原有 `@kitware/vtk.js` 命令式架构全量重构为 React Three Fiber 声明式架构，并新增 AI 牙齿分割服务。
+
+---
+
+## 功能特性
+
+- **AI 牙齿分割**：上传 STL 自动识别每颗牙齿并着色（MeshSegNet，15 类）
+- **3D 模型渲染**：加载上下颌 VTP / STL / GLB 模型，支持光照切换、视角旋转
+- **选择工具**：矩形框选、多边形圈选三角面，支持顶点删除
+- **宽度标注**：牙弓宽度测量线可视化
+- **样条曲线**：牙弓曲线控制点编辑
+- **牙齿编号**：FDI 标准牙位编号标注
+
+---
 
 ## 技术栈
 
-| 分类 | 技术 |
-|------|------|
-| 框架 | React 19 + TypeScript 6 |
-| 构建 | Vite 8 + babel-plugin-react-compiler |
-| 3D 引擎 | @kitware/vtk.js 35 |
-| 路由 | React Router 7 |
+| 层 | 技术 |
+|---|---|
+| 前端框架 | React 19 + TypeScript + Vite |
+| 3D 渲染 | Three.js + @react-three/fiber + @react-three/drei |
 | 状态管理 | Zustand 5 |
-| UI 组件 | @base-ui/react 1.0 |
-| 样式 | Tailwind CSS 4 + GSAP 3 |
-| 图标 | lucide-react |
-| HTTP | Axios + ali-oss |
+| 样式 | Tailwind CSS v4 + GSAP |
+| 后端 | FastAPI + Uvicorn（Python） |
+| AI 分割 | PyTorch + MeshSegNet |
+| 网格处理 | trimesh + PyVista |
+
+---
 
 ## 项目结构
 
 ```
-src/
-├── apis/               # API 接口层（模型获取、保存、测量）
-├── components/         # 通用 UI 组件（Loader、Card、Tasks、Tips）
-├── constants/          # 键盘快捷键、操作类型常量
-├── core/               # VTK 引擎核心（场景、选择、顶点编辑、测量）
-│   ├── index.ts        # 主引擎：场景初始化、交互、相机控制
-│   ├── toothModel.ts   # 牙齿模型类（读取器、映射器、过滤器）
-│   ├── vertexSculpture.ts      # 顶点编辑过滤器（删减点）
-│   ├── highlightSelectionPoints.ts  # 选择高亮过滤器
-│   ├── geometry.ts     # 几何算法（射线法点在多边形内测试）
-│   ├── archWidth.ts    # 牙弓宽度计算
-│   └── context.ts      # 模块级上下文（替代 window.* 全局变量）
-├── hooks/              # 自定义 React Hooks
-├── layout/
-│   ├── Header/         # 工具栏（选择工具、快捷键绑定）
-│   └── InfoSide/       # 右侧数据面板（宽度、Bolton 指数、拥挤度）
-├── pages/
-│   └── home/           # 主场景页面（模型加载、场景初始化）
-├── services/           # Web Worker 服务（正面视图计算）
-├── stores/             # Zustand 状态（核心方法、模型信息、面板数据）
-├── types/              # TypeScript 类型定义
-├── ui/                 # shadcn/base-ui 风格组件库
-└── workers/            # Web Worker 线程
+react-vtk-3d/
+├── src/
+│   ├── components/
+│   │   └── ToothViewer/          # 3D 场景主组件（R3F）
+│   │       ├── index.tsx         # Canvas + Overlay 入口
+│   │       ├── ToothMesh.tsx     # 牙齿网格（自动识别 VTP/GLB 格式）
+│   │       ├── HighlightPoints.tsx
+│   │       ├── SplineWidgets.tsx
+│   │       ├── WidthLabels.tsx
+│   │       └── useSceneActions.ts
+│   ├── lib/
+│   │   ├── VTKLoader.ts          # VTP 解析器（含 LABEL_LUT 26色方案）
+│   │   └── parseVTP.ts           # 原始 VTP 解析
+│   ├── stores/
+│   │   └── modules/
+│   │       └── tooth-scene.ts    # 牙齿场景 Zustand Store
+│   └── pages/home/index.tsx      # 主页面（自动调用分割接口）
+│
+└── server/
+    ├── main.py                   # FastAPI 服务入口（端口 9009）
+    ├── requirements.txt
+    ├── tooth_segmentation/
+    │   ├── meshsegnet.py         # MeshSegNet PyTorch 模型（官方实现）
+    │   ├── inference.py          # STL → 面标签推理（分块全覆盖）
+    │   ├── color_map.py          # FDI 标签 → RGB（与前端 LABEL_LUT 一致）
+    │   ├── export_glb.py         # 面标签 + 网格 → GLB
+    │   └── weights/
+    │       ├── meshsegnet_man.pth  # 下颌预训练权重（Mandible）
+    │       └── meshsegnet_max.pth  # 上颌预训练权重（Maxilla）
+    └── util.py
 ```
+
+---
 
 ## 快速开始
 
 ### 环境要求
 
-- Node.js >= 18
-- pnpm >= 9
+- Node.js >= 18，pnpm >= 9
+- Python >= 3.10
 
-### 安装依赖
+### 1. 前端
 
 ```bash
 pnpm install
-```
-
-### 配置环境变量
-
-复制并修改开发环境配置：
-
-```bash
-cp .env.development .env.local
-```
-
-```env
-VITE_MODE="development"
-VITE_API_URL="http://localhost:9009"
-```
-
-### 启动开发服务器
-
-```bash
 pnpm dev
+# 访问 http://localhost:8080
 ```
 
-访问 `http://localhost:8080`，页面会自动打开。
+### 2. 后端
+
+```bash
+cd server
+pip install -r requirements.txt
+python main.py
+# 服务运行在 http://localhost:9009
+```
+
+### 3. 权重文件
+
+从 [MeshSegNet/models](https://github.com/Tai-Hsien/MeshSegNet/tree/master/models) 下载两个 zip 文件，**直接重命名**（PyTorch zip 格式，无需解压）放入 `server/tooth_segmentation/weights/`：
+
+```
+MeshSegNet_Man_15_classes_72samples_lr1e-2_best.zip  →  meshsegnet_man.pth
+MeshSegNet_Max_15_classes_72samples_lr1e-2_best.zip  →  meshsegnet_max.pth
+```
+
+---
+
+## API
+
+### `POST /api/segment-teeth`
+
+上传 STL 文件，返回带每颗牙齿独立颜色的 GLB 文件。
+
+| 参数 | 类型 | 说明 |
+|---|---|---|
+| `file` | multipart | STL 文件（二进制或 ASCII） |
+| `jaw` | string | `lower`（下颌，默认）或 `upper`（上颌） |
+
+```bash
+# 下颌分割
+curl -X POST http://localhost:9009/api/segment-teeth \
+  -F "file=@down.stl" -F "jaw=lower" \
+  --output segmented.glb
+
+# 上颌分割
+curl -X POST http://localhost:9009/api/segment-teeth \
+  -F "file=@up.stl" -F "jaw=upper" \
+  --output segmented.glb
+```
+
+**响应**：`model/gltf-binary`，15 种颜色（0=牙龈，1-14=各牙位）  
+**耗时**：CPU 约 60 秒/颌，GPU 约 10 秒/颌
+
+---
+
+## 颜色方案（LABEL_LUT）
+
+前后端共用同一套 26 色方案，前 15 色用于 MeshSegNet 输出：
+
+| 标签 | 颜色 | 含义 |
+|---|---|---|
+| 0 | `rgb(90, 65, 60)` | 牙龈 |
+| 1 | `rgb(255, 60, 60)` | 牙位 1 |
+| 2 | `rgb(60, 180, 255)` | 牙位 2 |
+| 3–14 | 各不相同 | 牙位 3–14 |
+
+前端定义：`src/lib/VTKLoader.ts` → `LABEL_LUT`  
+后端定义：`server/tooth_segmentation/color_map.py` → `LABEL_LUT`
+
+---
 
 ## 构建
 
 ```bash
-# 开发环境构建
-pnpm build:dev
-
-# QA 环境构建
-pnpm build:qa
-
-# 构建后预览
-pnpm preview:dev
-pnpm preview:qa
+pnpm build:dev    # 开发环境
+pnpm build:qa     # QA 环境
+pnpm preview:dev  # 本地预览
 ```
 
-构建产物输出到 `dist/`，按类型分目录：
-
-```
-dist/
-└── assets/
-    ├── js/       # JavaScript chunks（react、base-ui、vtk、gsap 等独立分包）
-    ├── css/      # 样式文件
-    ├── model/    # 3D 模型资源
-    └── images/   # 图片资源
-```
-
-## 核心功能
-
-### 3D 模型操作
-
-| 功能 | 快捷键 | 说明 |
-|------|--------|------|
-| 移动视图 | — | 拖拽旋转、缩放场景 |
-| 框选 | `S` | 矩形框选牙齿顶点 |
-| 点选 | `P` | 多边形自由圈选顶点 |
-| 完成多边形 | `Space` | 封闭多边形并选中 |
-| 删除选中 | `Delete` | 删减选中的顶点区域 |
-| 重置视图 | `R` | 重置相机到初始位置 |
-| 取消选择 | `Esc` | 退出选择模式 |
-
-### 数据分析（右侧面板）
-
-- **牙弓宽度**：上下颌尖牙段 / 前磨牙段 / 磨牙段
-- **牙齿宽度**：每颗牙齿的个别宽度（毫米）
-- **牙弓周长**：上下颌总弓长
-- **Bolton 指数**：前牙比 / 全牙比及下颌偏大量
-- **拥挤度**：上下颌拥挤评估
-- **前牙覆合覆盖**：覆合 / 覆盖描述
-
-### 支持的模型格式
-
-| 格式 | 用途 |
-|------|------|
-| STL | 初始上传的原始模型 |
-| VTP | 保存修改后的模型（保留标量数据） |
-
-## 架构说明
-
-### VTK 引擎（`src/core/index.ts`）
-
-所有 3D 交互逻辑的入口，通过 `triggerInitScene()` 初始化场景后返回 `CoreMethods` 对象，存入 Zustand store 供全局调用。
-
-```
-场景初始化流程：
-URL 参数 planId → getAllToothInfo() → 下载模型文件 (ArrayBuffer)
-  → triggerInitScene(buffers) → 初始化 VTK 场景树
-  → 返回 CoreMethods → 存入 useCoreStore
-```
-
-### 顶点编辑流程
-
-```
-用户框选/多边形选择
-  → highlightSelectionPointsFilter（高亮预览）
-  → Delete 键 → vertexSculpture（重建点数组，跳过被删除点）
-  → 重新映射单元格索引 → 重新渲染
-```
-
-### 全局状态
-
-```typescript
-useCoreStore         // coreMethods: CoreMethods | null
-useModelsInfoStore   // modelsInfo: ModelInfo[]（上下颌文件名、删减状态）
-useTaskStatusStore   // status: 0 | 1 | 2（空闲 | 进行中 | 完成）
-useInfoSideDataStore // infoSideData: InfoSideData | null（分析结果）
-```
-
-### Web Worker
-
-`switchFrontViewWorker` 在后台线程计算正面视图相机参数（OBB 树 + 质心算法），避免阻塞主线程渲染。
-
-## 开发指南
-
-### 添加新的核心操作
-
-在 `src/core/index.ts` 的 `CoreMethods` 返回对象中添加新方法，并在 `src/types/index.ts` 的 `CoreMethods` 接口中补充类型声明。
-
-### 添加新 API
-
-在 `src/apis/` 目录创建新文件，使用 `src/utils/request.ts` 中封装的 axios 实例。
-
-### 添加新 UI 组件
-
-在 `src/ui/` 目录添加基于 `@base-ui/react` 的组件，参考现有的 `accordion.tsx`、`button.tsx` 等文件的写法。
-
-### 环境变量类型安全
-
-在 `src/env.d.ts` 中声明新的环境变量类型，确保 `import.meta.env.*` 有完整的 TypeScript 提示。
-
-## React Compiler
-
-项目使用 `babel-plugin-react-compiler` 自动处理组件记忆化，**不需要手动编写** `memo()`、`useMemo`、`useCallback`。React Compiler 在编译时静态分析并自动插入必要的优化。
+---
 
 ## 代理配置
 
-开发服务器代理 `/api` 请求到后端：
+开发服务器代理 `/api` 请求到后端（`vite.config.ts`）：
 
 ```
 /api/* → http://localhost:9009/*
 ```
 
-修改代理目标请编辑 `vite.config.ts` 的 `server.proxy` 配置，或在 `.env.development` 中修改 `VITE_API_URL`。
+---
+
+## MeshSegNet 推理说明
+
+- **模型**：MeshSegNet（MICCAI 2019 / IEEE TMI 2020），图神经网络
+- **输入特征**：每个三角面 15 维（顶点坐标×9 + 质心×3 + 法线×3，全部归一化）
+- **邻接矩阵**：基于归一化质心距离（A_S: <0.1，A_L: <0.2）
+- **推理策略**：28 万面分成约 47 个 6000 面的块，全部覆盖直接预测（无插值）
+- **类别**：15 类（0=牙龈，1-14=各牙位）
+
+参考论文：[IEEE TMI 2020](https://ieeexplore.ieee.org/abstract/document/8984309)
