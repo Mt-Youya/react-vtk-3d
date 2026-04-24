@@ -81,8 +81,6 @@ export interface CoreMethods {
   setCamera(info: CameraInfo): void
   /** 返回 VTP XML 文本，每个模型一个字符串 */
   getNowFile(): string[]
-  /** @deprecated 拼写错误，请使用 getSingleNowFile */
-  getSinleNowFile(index: number): string
   getSingleNowFile(index: number): string
   getFullscreenRenderer(): VTKObject
   triggerFinalFile(buffers: string[]): void

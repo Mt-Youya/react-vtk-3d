@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+pyvista
+pydantic
+numpy
+torch
+trimesh[easy]
+Pillow
+scipy
+fast-simplification
