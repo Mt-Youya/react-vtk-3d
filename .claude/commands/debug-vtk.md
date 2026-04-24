@@ -62,6 +62,8 @@ Reader（读取文件）
 **相机问题**：
 - 检查 `switchView()` 中的相机参数
 - 检查 Web Worker 返回的 `CameraInfo` 格式：`[focalPoint, viewUp, position]`
+- **关键**：`viewUp` 不能与视线方向（position - focalPoint）平行，否则旋转会失效
+- 默认相机位置应确保距离足够（如 `[0, -300, 0]` 而非 `[0, -1, 0]`），否则模型可能在视锥体外
 
 ### 第三步：添加调试日志
 
@@ -92,6 +94,7 @@ console.log('boundary:', boundary)
 |------|---------|---------|
 | 模型不显示 | Actor 未添加到 Renderer | `toothModel.ts` 的 `actor` 初始化 |
 | 选择无响应 | 事件监听未绑定 | `handleSelection()` 中的 interactor 配置 |
+| 点击按钮无反应 | 事件委托问题（SVG 图标） | 检查是否使用直接 `onClick` 绑定 |
 | 删除后崩溃 | 点 ID 越界 | `vertexSculpture.ts` 的索引重映射 |
 | 颜色异常 | LUT 未更新 | `mapper.setLookupTable()` 调用 |
 | 相机跳动 | focalPoint 计算错误 | `switchFrontView.ts` Worker |

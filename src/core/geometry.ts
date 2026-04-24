@@ -1,6 +1,7 @@
 import vtkMath from "@kitware/vtk.js/Common/Core/Math"
 import vtkOBBTree from "@kitware/vtk.js/Filters/General/OBBTree"
 import vtkCoordinate from "@kitware/vtk.js/Rendering/Core/Coordinate"
+import { getRenderer } from "./context"
 
 void vtkOBBTree // referenced by some callers
 
@@ -319,13 +320,15 @@ export function getModelMmToPx(
         }
     }
 
+    const renderer = getRenderer()
     const [coord1, coord2] = [expectedPoints[0], expectedPoints[targetIdx]].map((item) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const coordObj = vtkCoordinate.newInstance({
             value: item,
-            renderer: (window as any).renderer,
+            renderer,
         } as any)
-        return coordObj.getComputedLocalDisplayValue()
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return (coordObj as any).getComputedLocalDisplayValue()
     })
 
     const pxDist = distance([...coord1, 0], [...coord2, 0])

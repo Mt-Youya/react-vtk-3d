@@ -16,14 +16,10 @@ export default class SelectToothIdx {
         this.#container = container
         this.#pos = pos
 
-        this.#createDom()
-        this.#container.querySelector(".btn-clear-tooth")!.addEventListener("click", () => {
-            onSelect(0)
-            this.delete()
-        })
+        this.#createDom(onSelect)
     }
 
-    #createDom(): void {
+    #createDom(onSelect: (val: number) => void): void {
         const elem = document.createElement("div")
         const arr: [number, number][] = [
             [55, 51],
@@ -65,15 +61,23 @@ export default class SelectToothIdx {
         `
         this.#elem = elem
         this.#container!.appendChild(elem)
-        elem.querySelectorAll(".tooth-idx").forEach((item) => {
-            item.addEventListener("click", (e) => this.onClick(e as MouseEvent))
-        })
-    }
 
-    onClick(e: MouseEvent): void {
-        const val = this.#toothMap(parseInt((e.target as HTMLElement).innerText))
-        this.#onSelect!(val)
-        this.delete()
+        // 使用事件委托处理牙齿编号点击
+        const wrap = elem.querySelector(".tooth-idx-wrap")!
+        wrap.addEventListener("click", (e) => {
+            const target = (e.target as HTMLElement).closest(".tooth-idx")
+            if (!target) return
+            const val = this.#toothMap(parseInt(target.textContent || "0"))
+            onSelect(val)
+            this.delete()
+        })
+
+        // 清除按钮直接绑定 onclick
+        const clearBtn = elem.querySelector(".btn-clear-tooth") as HTMLElement
+        clearBtn.onclick = () => {
+            onSelect(0)
+            this.delete()
+        }
     }
 
     #toothMap(val: number): number {

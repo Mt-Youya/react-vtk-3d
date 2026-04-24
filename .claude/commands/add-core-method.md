@@ -34,6 +34,7 @@
 - 使用 `context.ts` 中的 `getRenderer()` 等获取 VTK 对象，不要用 `window.*`
 - 操作完成后调用 `renderWindow.render()` 刷新视图
 - 如果需要操作模型，通过 `models` 数组访问 `ToothModel` 实例
+- **事件处理**：非 React 组件优先使用事件委托（父元素统一监听）或直接 `onclick` 绑定，避免 `addEventListener` 循环
 
 ### 第三步：更新类型声明
 

@@ -94,7 +94,39 @@ Base UI 组件支持以下 CSS 数据属性实现进入/退出动画：
 [data-ending-style] { opacity: 0; transform: scale(0.95); }
 ```
 
-### 第五步：验证
+### 第五步：事件处理最佳实践
+
+**React 组件**：优先使用直接 `onClick` 绑定，而非事件委托：
+
+```typescript
+// ✅ 推荐：直接绑定
+<button onClick={handleClick}>
+  <Icon /> 文字
+</button>
+
+// ❌ 避免：ul 上的事件委托（无法处理 SVG 图标点击）
+<ul onClick={handleActionsClick}>
+  <li data-action="xxx"><Icon /> 文字</li>
+</ul>
+```
+
+**非 React 组件（纯 TS 类）**：
+- 多元素点击：使用**事件委托**（父元素统一监听）
+- 单元素点击：使用 `onclick` 直接绑定
+
+```typescript
+// 事件委托（减少监听器数量）
+parent.addEventListener("click", (e) => {
+    const target = (e.target as HTMLElement).closest(".item-class")
+    if (!target) return
+    // 处理点击
+})
+
+// 单元素直接绑定
+element.onclick = () => { /* ... */ }
+```
+
+### 第六步：验证
 
 运行 `pnpm build:dev` 确认无 TypeScript 错误。
 

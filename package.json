@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --open --host",
-    "build:dev": "vite build --mode devlopment",
+    "build:dev": "vite build --mode development",
     "build:qa": "vite build --mode qa",
     "preview:dev": "pnpm build:dev && vite preview --host --open",
     "preview:qa": "pnpm build:qa && vite preview --host --open"

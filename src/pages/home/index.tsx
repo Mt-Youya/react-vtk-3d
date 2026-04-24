@@ -1,4 +1,4 @@
-import { useRef, useEffect, startTransition } from "react"
+import React, { useRef, useEffect, startTransition } from "react"
 import { useSearchParams } from "react-router-dom"
 import Header from "@/layout/Header"
 import InfoSide from "@/layout/InfoSide"
@@ -128,7 +128,7 @@ export default function Home() {
                         id="container"
                         className="w-[calc(100vw-384px)] h-full relative"
                         ref={containerRef}
-                        onClick={coreMethods?.handleRootClick}
+                        onClick={coreMethods?.handleRootClick as React.MouseEventHandler<HTMLDivElement> | undefined}
                     />
                 </div>
                 <Card />

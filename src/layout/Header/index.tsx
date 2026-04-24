@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react"
+import { logger } from "@/utils/logger"
 import {
     MoveIcon,
     RectangleHorizontalIcon,
@@ -127,11 +128,11 @@ export default function Header() {
     }
 
     function handleArchWidthSelect(action: string) {
-        console.log("arch width action:", action)
+        logger.debug("arch width action:", action)
     }
 
     function handleSave() {
-        console.log("save")
+        logger.debug("save")
     }
 
     useEffect(() => {

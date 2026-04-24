@@ -46,7 +46,7 @@ export default function Card() {
 
         switch (index) {
             case 0: coreMethods?.switchView(0); break
-            case 1: coreMethods?.switchView(1, index); break
+            case 1: coreMethods?.switchView(1, 0); break  // 颌面视图 - 默认显示下颌
             default: coreMethods?.switchView(2); break
         }
     }

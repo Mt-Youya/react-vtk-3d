@@ -67,4 +67,17 @@ Bundle 大小：
 
 - 项目使用 `babel-plugin-react-compiler`，构建时会自动插入记忆化优化
 - VTK.js chunk 较大（~1.4 MB）是正常的，该库本身体积大
-- 构建模式 `devlopment`（注意原始拼写有误）使用 `--mode devlopment` 参数
+
+## 代码质量检查清单
+
+在构建前检查以下常见代码问题：
+
+### 事件处理
+- [ ] React 组件使用直接 `onClick` 绑定，而非 `<ul onClick={handler}>` 事件委托
+- [ ] 非 React 组件（`core/` 目录）使用事件委托或直接 `onclick` 绑定
+- [ ] 避免循环 `addEventListener` 绑定大量元素
+
+### VTK 渲染
+- [ ] 修改相机参数后调用 `renderer.resetCamera()` 重新计算裁剪平面
+- [ ] 操作完成后调用 `renderWindow.render()` 刷新视图
+- [ ] 相机 `viewUp` 不与视线方向平行

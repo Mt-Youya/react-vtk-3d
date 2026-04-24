@@ -7,46 +7,51 @@
 type AnyObj = any
 
 interface CoreContext {
-    renderer: AnyObj | null
-    selectorDataSource: { output: AnyObj[] | null } | null
-    hlCells: number[]
+  renderer: AnyObj | null
+  selectorDataSource: { output: AnyObj[] | null } | null
+  hlCells: number[]
+  apiSpecificRenderWindow: AnyObj | null
 }
 
 const ctx: CoreContext = {
-    renderer: null,
-    selectorDataSource: null,
-    hlCells: [],
+  renderer: null,
+  selectorDataSource: null,
+  hlCells: [],
+  apiSpecificRenderWindow: null,
 }
 
 export function getRenderer(): AnyObj | null {
-    return ctx.renderer
+  return ctx.renderer
 }
 
 export function setRenderer(renderer: AnyObj): void {
-    ctx.renderer = renderer
-    // 保留向后兼容的 window 挂载，供尚未迁移的代码使用
-    ;(window as AnyObj).renderer = renderer
+  ctx.renderer = renderer
 }
 
 export function getSelectorDataSource(): { output: AnyObj[] | null } | null {
-    return ctx.selectorDataSource
+  return ctx.selectorDataSource
 }
 
 export function setSelectorDataSource(ds: { output: AnyObj[] | null }): void {
-    ctx.selectorDataSource = ds
-    ;(window as AnyObj).selectorDataSource = ds
+  ctx.selectorDataSource = ds
 }
 
 export function getHlCells(): number[] {
-    return ctx.hlCells
+  return ctx.hlCells
 }
 
 export function setHlCells(cells: number[]): void {
-    ctx.hlCells = cells
-    ;(window as AnyObj).hlCells = cells
+  ctx.hlCells = cells
 }
 
 export function clearHlCells(): void {
-    ctx.hlCells = []
-    ;(window as AnyObj).hlCells = []
+  ctx.hlCells = []
+}
+
+export function getApiSpecificRenderWindow(): AnyObj | null {
+  return ctx.apiSpecificRenderWindow
+}
+
+export function setApiSpecificRenderWindow(rw: AnyObj): void {
+  ctx.apiSpecificRenderWindow = rw
 }
