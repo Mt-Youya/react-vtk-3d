@@ -36,9 +36,8 @@ export class ThreeRenderer {
 
     // ── Controls ───────────────────────────────────────────────────────────
     this.controls = new OrbitControls(this.camera, this.renderer.domElement)
-    this.controls.enableDamping = true
-    this.controls.dampingFactor = 0.05
-    this.controls.addEventListener("change", () => this.render())
+    this.controls.enableDamping = false // 禁用 damping 避免需要动画循环
+    this.controls.addEventListener("change", () => this._renderOnce())
 
     // ── 光照 ───────────────────────────────────────────────────────────────
     const ambient = new THREE.AmbientLight(0xffffff, 0.6)
@@ -57,12 +56,17 @@ export class ThreeRenderer {
     this.camera.aspect = w / h
     this.camera.updateProjectionMatrix()
     this.renderer.setSize(w, h)
-    this.render()
+    this._renderOnce()
+  }
+
+  /** 直接渲染一帧（不触发 controls.update，避免递归） */
+  private _renderOnce(): void {
+    this.renderer.render(this.scene, this.camera)
   }
 
   render(): void {
     this.controls.update()
-    this.renderer.render(this.scene, this.camera)
+    this._renderOnce()
   }
 
   // ── 相机控制 ──────────────────────────────────────────────────────────────

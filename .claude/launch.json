@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "react-vtk-3d",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["dev", "--", "--no-open"],
+      "port": 5173,
+      "autoPort": true
+    }
+  ]
+}

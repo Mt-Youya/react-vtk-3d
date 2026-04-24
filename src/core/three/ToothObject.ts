@@ -1,5 +1,5 @@
 import * as THREE from "three"
-import { parseVTP } from "@/lib/VTKLoader"
+import { parseVTP } from "@/lib/parseVTP"
 
 /** 与 VTKLoader.ts 中的 LABEL_LUT 完全一致（26 色） */
 const LABEL_LUT: [number, number, number][] = [
@@ -80,9 +80,9 @@ export class ToothObject {
     )
     this.mainMesh.name = name
 
-    // 线框
+    // 线框（初始用空 BufferGeometry，加载数据后再更新）
     this.wireMesh = new THREE.LineSegments(
-      new THREE.WireframeGeometry(this.workGeo),
+      new THREE.BufferGeometry(),
       new THREE.LineBasicMaterial({ color: 0x006600, transparent: true, opacity: 0.3 }),
     )
     this.wireMesh.visible = false
@@ -94,10 +94,10 @@ export class ToothObject {
     )
   }
 
-  /** 从 VTP ArrayBuffer 加载 */
-  async loadVTP(buffer: ArrayBuffer): Promise<void> {
-    const { positions, normals, colors } = await parseVTP(buffer)
-    this._buildGeometry(positions, normals, colors, null)
+  /** 从 VTP/VTK ArrayBuffer 加载 */
+  loadVTP(buffer: ArrayBuffer): void {
+    const { positions, normals, colors, cellLabels } = parseVTP(buffer)
+    this._buildGeometry(positions, normals, colors, cellLabels)
   }
 
   /** 从已解析的数组数据加载（供 STL 路径使用） */

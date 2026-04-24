@@ -211,25 +211,19 @@ export default (function () {
 
     // ── 内部工具函数 ────────────────────────────────────────────────────────
 
-    function _loadBuffers(buffers: ArrayBuffer[], type: string): Promise<void> {
-      const promises = teeth.map((tooth, i) => {
-        if (!buffers[i]) return Promise.resolve()
-        if (type === "vtp") {
-          return tooth.loadVTP(buffers[i])
-        } else {
-          // STL：使用 parseVTP 不支持 STL，需要外部解析后 loadFromArrays
-          // 此处保持与旧版一致：STL 也用 loadVTP（VTKLoader 支持 STL 格式）
-          return tooth.loadVTP(buffers[i])
-        }
+    function _loadBuffers(buffers: ArrayBuffer[], _type: string): void {
+      teeth.forEach((tooth, i) => {
+        if (!buffers[i]) return
+        // VTKLoader.parse 同步，直接调用
+        tooth.loadVTP(buffers[i])
       })
-      return Promise.all(promises).then(() => undefined)
     }
 
-    async function _triggerInitScene(
+    function _triggerInitScene(
       buffers: ArrayBuffer[],
       forceFrontFace: boolean,
       type = "stl",
-    ): Promise<boolean> {
+    ): boolean {
       if (!buffers?.length) return false
 
       // 重置旧数据
@@ -247,7 +241,7 @@ export default (function () {
         scene.add(t.highlightPoints)
       })
 
-      await _loadBuffers(buffers, type)
+      _loadBuffers(buffers, type)
 
       if (!cachedBuffers) cachedBuffers = buffers
 
@@ -346,21 +340,18 @@ export default (function () {
 
       triggerFinalFile(buffers: string[]): void {
         if (!buffers?.length) return
-        const promises = teeth.map((tooth, i) => {
-          if (!buffers[i]) return Promise.resolve()
-          const encoder = new TextEncoder()
-          return tooth.loadVTP(encoder.encode(buffers[i]).buffer)
+        const encoder = new TextEncoder()
+        teeth.forEach((tooth, i) => {
+          if (!buffers[i]) return
+          tooth.loadVTP(encoder.encode(buffers[i]).buffer)
         })
-        Promise.all(promises).then(() => {
-          threeRenderer.render()
-        })
+        threeRenderer.render()
       },
 
       triggerFile(buffer: string, idx: number): void {
         const encoder = new TextEncoder()
-        teeth[idx].loadVTP(encoder.encode(buffer).buffer).then(() => {
-          threeRenderer.render()
-        })
+        teeth[idx].loadVTP(encoder.encode(buffer).buffer)
+        threeRenderer.render()
       },
 
       // ── 选择 ──────────────────────────────────────────────────────────────
