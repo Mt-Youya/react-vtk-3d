@@ -240,8 +240,8 @@ async def segment_teeth(
         from tooth_segmentation.inference import segment_stl
         from tooth_segmentation.export_glb import export_to_glb_from_stl
 
-        # 推理（n_runs 次随机采样投票，越多越精细，每次约 3s）
-        face_labels = segment_stl(stl_bytes, weights_path, n_runs=10)
+        # 推理（n_runs=1 已覆盖所有面，n_runs>1 可多轮投票减少边界噪点）
+        face_labels = segment_stl(stl_bytes, weights_path, n_runs=1)
 
         # 导出 GLB
         glb_bytes = export_to_glb_from_stl(stl_bytes, face_labels)
